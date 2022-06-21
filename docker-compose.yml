@@ -1,0 +1,35 @@
+version: '3'
+services:
+  mongo:
+    hostname: mongo
+    image: 'bitnami/mongodb:latest'
+    environment:
+      MONGODB_ROOT_PASSWORD: example
+    logging:
+      driver: "none"
+    ports:
+      - 27017:27017
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    depends_on:
+      - mongo
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_SERVER: mongo
+    logging:
+      driver: "none"
+
+  crawler:
+    build: .
+    environment:
+      - PUBLIC_API_HOST=https://public.api.openprocurement.org
+      - MONGODB_URL=mongodb://root:example@mongo:27017
+    depends_on:
+      - mongo
+    volumes:
+      - "./src:/app"
