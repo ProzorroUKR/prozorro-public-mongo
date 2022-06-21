@@ -1,7 +1,6 @@
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import PyMongoError
-from pymongo.operations import ReplaceOne
 from typing import Callable
 from prozorro_public_mongo.settings import (
     MONGODB_COLLECTION,
@@ -32,7 +31,6 @@ __collection = None
 
 def get_collection():
     global __collection
-    print(["get_collection", __collection])
     if __collection is None:
         client = AsyncIOMotorClient(MONGODB_URL)
         __collection = client[MONGODB_DATABASE][MONGODB_COLLECTION]
@@ -40,11 +38,6 @@ def get_collection():
 
 
 @retry_decorator
-async def upsert_tenders(tenders: list):
-    operations = []
-    for t in tenders:
-        uid = t.pop("id")
-        operations.append(ReplaceOne({"_id": uid}, t, upsert=True))
-    result = await get_collection().bulk_write(operations)
-    print([result.inserted_count, result.modified_count])
+async def upsert_tender(uid: str, data: dict):
+    await get_collection().replace_one({"_id": uid}, data, upsert=True)
 
