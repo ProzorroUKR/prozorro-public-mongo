@@ -16,11 +16,18 @@ async def get_tender(session, uid):
 
 async def process_tender(session, uid):
     data = await get_tender(session, uid)
-    # TODO filter data here
-    data.pop("documents", None)
+    # TODO filter data here\
+    if 'documents' in data.keys():
+        data.pop("documents", None)
     for key in data.keys():
-        if 'documents' in data[key].keys():
+        if type(data[key]) is dict and 'documents' in data[key].keys():
             data[key].pop('documents')
+        if type(data[key]) is list:
+            for i in range(0, len(data[key])):
+                if type(data[key][i]) is dict and 'documents' in data[key][i].keys():
+                    data[key][i].pop('documents')
+
+        
     # data.pop("complaints", None)
     await upsert_tender(uid, data)
 
