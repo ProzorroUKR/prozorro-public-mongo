@@ -17,10 +17,7 @@ async def get_tender(session, uid):
 async def process_tender(session, uid):
     data = await get_tender(session, uid)
     # TODO filter data here
-    data.pop("documents", None)
-    for key in data.keys():
-        if 'documents' in data[key].keys():
-            data[key].pop('documents')
+    # data.pop("documents", None)
     # data.pop("complaints", None)
     await upsert_tender(uid, data)
 
