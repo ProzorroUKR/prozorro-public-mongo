@@ -1,6 +1,5 @@
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo.errors import PyMongoError
 from typing import Callable
 from prozorro_public_mongo.settings import (
     MONGODB_COLLECTION,
@@ -18,10 +17,10 @@ def retry_decorator(func: Callable) -> Callable:
         while True:
             try:
                 return await func(*args, **kwargs)
-            except PyMongoError as e:
-                logger.warning({"message": "Retry on mongo error",
+            except Exception as e:
+                logger.warning({"message": "Retry on error",
                                 "error": e, "error_args": e.args},
-                               extra={"MESSAGE_ID": "MONGODB_EXCEPTION"})
+                               extra={"MESSAGE_ID": "RETRY_EXCEPTION"})
                 await asyncio.sleep(ERROR_INTERVAL)
     return decorated
 
