@@ -24,12 +24,99 @@ services:
     logging:
       driver: "none"
 
-  crawler:
+  tenders: &crawler
     build: .
-    environment:
-      - PUBLIC_API_HOST=https://public.api.openprocurement.org
-      - MONGODB_URL=mongodb://root:example@mongo:27017
+    command: ["python", "-m", "prozorro_public_mongo.tenders"]
+    environment: &crawler_env
+      PUBLIC_API_HOST: "https://public.api.openprocurement.org"
+      MONGODB_URL: "mongodb://root:example@mongo:27017"
+      API_LIMIT: 10
+      FEED_STEP_INTERVAL: 2
     depends_on:
       - mongo
     volumes:
       - "./src:/app"
+
+  plans:
+    <<: *crawler
+    command: ["python", "-m", "prozorro_public_mongo.plans"]
+    environment:
+      <<: *crawler_env
+      MONGODB_COLLECTION: "plans"
+      API_RESOURCE: "plans"
+      MONGODB_STATE_ID: "FEED_PLANS_STATE"
+
+  contracts:
+    <<: *crawler
+    command: ["python", "-m", "prozorro_public_mongo.contracts"]
+    environment:
+      <<: *crawler_env
+      MONGODB_COLLECTION: "contracts"
+      API_RESOURCE: "contracts"
+      MONGODB_STATE_ID: "FEED_CONTRACTS_STATE"
+
+  categories:
+    <<: *crawler
+    command: ["python", "-m", "prozorro_public_mongo.categories"]
+    environment:
+      <<: *crawler_env
+      PUBLIC_API_HOST: "https://catalog-api-staging.prozorro.gov.ua"
+      API_VERSION: "0"
+      MONGODB_COLLECTION: "categories"
+      API_RESOURCE: "categories"
+      MONGODB_STATE_ID: "FEED_CATEGORIES_STATE"
+
+  offers:
+    <<: *crawler
+    command: ["python", "-m", "prozorro_public_mongo.offers"]
+    environment:
+      <<: *crawler_env
+      PUBLIC_API_HOST: "https://catalog-api-staging.prozorro.gov.ua"
+      API_VERSION: "0"
+      MONGODB_COLLECTION: "offers"
+      API_RESOURCE: "offers"
+      MONGODB_STATE_ID: "FEED_OFFERS_STATE"
+
+  products:
+    <<: *crawler
+    command: ["python", "-m", "prozorro_public_mongo.products"]
+    environment:
+      <<: *crawler_env
+      PUBLIC_API_HOST: "https://catalog-api-staging.prozorro.gov.ua"
+      API_VERSION: "0"
+      MONGODB_COLLECTION: "products"
+      API_RESOURCE: "products"
+      MONGODB_STATE_ID: "FEED_PRODUCTS_STATE"
+
+  profiles:
+    <<: *crawler
+    command: ["python", "-m", "prozorro_public_mongo.profiles"]
+    environment:
+      <<: *crawler_env
+      PUBLIC_API_HOST: "https://catalog-api-staging.prozorro.gov.ua"
+      API_VERSION: "0"
+      MONGODB_COLLECTION: "profiles"
+      API_RESOURCE: "profiles"
+      MONGODB_STATE_ID: "FEED_PROFILES_STATE"
+
+  monitorings:
+    <<: *crawler
+    command: ["python", "-m", "prozorro_public_mongo.monitorings"]
+    environment:
+      <<: *crawler_env
+      PUBLIC_API_HOST: "https://audit-api-staging.prozorro.gov.ua"
+      API_VERSION: "0"
+      MONGODB_COLLECTION: "monitorings"
+      API_RESOURCE: "monitorings"
+      MONGODB_STATE_ID: "FEED_MONITORINGS_STATE"
+
+  inspections:
+    <<: *crawler
+    command: ["python", "-m", "prozorro_public_mongo.inspections"]
+    environment:
+      <<: *crawler_env
+      PUBLIC_API_HOST: "https://audit-api-staging.prozorro.gov.ua"
+      API_VERSION: "0"
+      MONGODB_COLLECTION: "inspections"
+      API_RESOURCE: "inspections"
+      MONGODB_STATE_ID: "FEED_INSPECTIONS_STATE"

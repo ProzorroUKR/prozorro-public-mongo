@@ -25,18 +25,21 @@ def retry_decorator(func: Callable) -> Callable:
     return decorated
 
 
-__collection = None
+DB = None
+
+
+def get_database():
+    global DB
+    if DB is None:
+        DB = AsyncIOMotorClient(MONGODB_URL)[MONGODB_DATABASE]
+    return DB
 
 
 def get_collection():
-    global __collection
-    if __collection is None:
-        client = AsyncIOMotorClient(MONGODB_URL)
-        __collection = client[MONGODB_DATABASE][MONGODB_COLLECTION]
-    return __collection
+    return get_database()[MONGODB_COLLECTION]
 
 
 @retry_decorator
-async def upsert_tender(uid: str, data: dict):
+async def upsert_object(uid: str, data: dict):
     await get_collection().replace_one({"_id": uid}, data, upsert=True)
 
